@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -26,6 +27,8 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var nomeUsuario: EditText
     lateinit var btnConfirmar: Button
+    lateinit var tvEmptyStateRepos: TextView
+    lateinit var tvEmptyStateUser: TextView
     lateinit var listaRepositories: RecyclerView
     lateinit var githubApi: GitHubService
 
@@ -34,9 +37,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setupView()
         setupRetrofit()
-        showUserName()
-        // getAllReposByUserName()
         setupListeners()
+
+        val cachedUsername = getChachedUserName()
+        if (cachedUsername != null) {
+            nomeUsuario.setText(cachedUsername)
+//            getAllReposByUserName(cachedUsername)
+        }
     }
 
     // Encontra os elementos da activity pelo ID
@@ -44,6 +51,8 @@ class MainActivity : AppCompatActivity() {
         nomeUsuario = findViewById(R.id.et_nome_usuario)
         btnConfirmar = findViewById(R.id.btn_confirmar)
         listaRepositories = findViewById(R.id.rv_lista_repositories)
+        tvEmptyStateRepos = findViewById(R.id.tv_user_empty_repos)
+        tvEmptyStateUser = findViewById(R.id.tv_empty_state_user)
     }
 
 
@@ -67,11 +76,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showUserName() {
+    private fun getChachedUserName(): String? {
         // Depois de persistir o usuario exibir sempre as informacoes no EditText se a sharedpref possuir algum valor
         val userSharedPref = getPreferences(Context.MODE_PRIVATE)
-        val userFromSharedPref = userSharedPref.getString(getString(R.string.saved_user), "")
-        nomeUsuario.setText(userFromSharedPref)
+        var userFromSharedPref = userSharedPref.getString(getString(R.string.saved_user), "")
+
+        if (userSharedPref == null || userSharedPref.equals("")) {
+            userFromSharedPref = null
+
+        }
+        return userFromSharedPref
     }
 
     // Metodo responsavel por fazer a configuracao base do Retrofit
@@ -93,12 +107,28 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call<List<Repository>>, response: Response<List<Repository>>) {
                 if (response.isSuccessful) {
                     // chamada feita com sucesso, mostra os repositorios
-                    response.body()?.let { setupAdapter(it) }
-                    Log.d("Resposta API ->", response.body().toString())
+                    tvEmptyStateRepos.visibility = View.GONE
+                    tvEmptyStateUser.visibility = View.GONE
+                    listaRepositories.visibility = View.VISIBLE
 
-                } else {
-                    val toast = Toast.makeText(applicationContext, R.string.response_error, Toast.LENGTH_LONG)
-                    toast.show()
+                    response.body()?.let { setupAdapter(it) }
+
+                    // se o usuário é encontrado mas repositórios estão vazios
+                    if (response.body()?.isEmpty() == true) {
+                        tvEmptyStateUser.visibility = View.GONE
+                        tvEmptyStateRepos.visibility = View.VISIBLE
+                        Log.i("Resposta API ->", "User não tem repos")
+                    }
+
+                    // usuário não encontrado
+                } else if (response.code() == 404) {
+                    tvEmptyStateRepos.visibility = View.GONE
+                    listaRepositories.visibility = View.GONE
+                    tvEmptyStateUser.visibility = View.VISIBLE
+                    Log.d("Resposta 404 ->", "Usuário não encontrado")
+
+                } else if (response.code() == 403) {
+                    Log.e("Resposta API 403 ->", "Limite de requisicoes excedido")
                 }
             }
 
@@ -117,7 +147,6 @@ class MainActivity : AppCompatActivity() {
         val repoAdapter = RepositoryAdapter(list)
         listaRepositories.adapter = repoAdapter
     }
-
 
     // Metodo responsavel por compartilhar o link do repositorio selecionado
     // @Todo 11 - Colocar esse metodo no click do share item do adapter

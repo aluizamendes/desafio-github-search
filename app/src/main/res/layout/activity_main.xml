@@ -38,6 +38,32 @@
         app:layout_constraintStart_toStartOf="@id/et_nome_usuario"
         app:layout_constraintTop_toBottomOf="@id/et_nome_usuario" />
 
+    <TextView
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_empty_state_user"
+        android:text="@string/empty_state_user"
+        android:textAlignment="center"
+        android:textSize="16dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/btn_confirmar"
+        app:layout_constraintStart_toStartOf="@+id/et_nome_usuario"
+        app:layout_constraintTop_toBottomOf="@+id/btn_confirmar" />
+
+    <TextView
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_user_empty_repos"
+        android:text="@string/user_empty_repos"
+        android:textAlignment="center"
+        android:textSize="16dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/btn_confirmar"
+        app:layout_constraintStart_toStartOf="@+id/et_nome_usuario"
+        app:layout_constraintTop_toBottomOf="@+id/btn_confirmar" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_lista_repositories"
         android:layout_width="0dp"
@@ -47,6 +73,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_confirmar"
-        tools:listitem="@layout/repository_item" />
+        tools:listitem="@layout/repository_item"
+        android:visibility="gone"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

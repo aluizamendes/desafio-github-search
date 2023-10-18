@@ -3,5 +3,7 @@
     <string name="nome_usuario">Nome do usuário</string>
     <string name="confirmar">Confirmar</string>
     <string name="saved_user"></string>
+    <string name="user_empty_repos">Este usuário não possui repositórios.</string>
+    <string name="empty_state_user">Digite um nome de usuário válido e aperte \'Confirmar\' para listar os repositórios :)</string>
     <string name="response_error">Ocorreu um erro :(</string>
 </resources>
