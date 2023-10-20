@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Encontra os elementos da activity pelo ID
+    // encontra os elementos da activity pelo ID
     fun setupView() {
         nomeUsuario = findViewById(R.id.et_nome_usuario)
         btnConfirmar = findViewById(R.id.btn_confirmar)
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    // Metodo responsavel por configurar os listeners click da tela
+    // metodo responsavel por configurar os listeners click da tela
     private fun setupListeners() {
         // Colocar a ação de click do botao confirmar
 
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         return userFromSharedPref
     }
 
-    // Metodo responsavel por fazer a configuracao base do Retrofit
+    // metodo responsavel por fazer a configuracao base do Retrofit
     fun setupRetrofit() {
         val url = "https://api.github.com/"
         val retrofit = Retrofit.Builder()
@@ -99,9 +99,10 @@ class MainActivity : AppCompatActivity() {
         githubApi = retrofit.create(GitHubService::class.java)
     }
 
-    // Metodo responsavel por buscar todos os repositorios do usuario fornecido
+    // metodo responsavel por buscar todos os repositorios do usuario fornecido
     fun getAllReposByUserName(user: String) {
-        // Realizar a implementacao do callback do retrofit e chamar o metodo setupAdapter se retornar os dados com sucesso
+
+        // realizar a implementacao do callback do retrofit e chamar o metodo setupAdapter se retornar os dados com sucesso
         githubApi.getAllRepositoriesByUser(user).enqueue(object: Callback<List<Repository>> {
 
             override fun onResponse(call: Call<List<Repository>>, response: Response<List<Repository>>) {
@@ -135,43 +136,37 @@ class MainActivity : AppCompatActivity() {
             override fun onFailure(call: Call<List<Repository>>, t: Throwable) {
                 Log.e("API Call", "Falha na chamada à API", t)
             }
-
         })
     }
 
-    // Metodo responsavel por realizar a configuracao do adapter
+    // metodo responsavel por realizar a configuracao do adapter
     fun setupAdapter(list: List<Repository>) {
         listaRepositories.visibility = View.VISIBLE
 
         // criar o adapter
         val repoAdapter = RepositoryAdapter(list)
         listaRepositories.adapter = repoAdapter
-    }
 
-    // Metodo responsavel por compartilhar o link do repositorio selecionado
-    // @Todo 11 - Colocar esse metodo no click do share item do adapter
-    fun shareRepositoryLink(urlRepository: String) {
-        val sendIntent: Intent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, urlRepository)
-            type = "text/plain"
+        // Metodo responsavel por compartilhar o link do repositorio selecionado
+        repoAdapter.shareRepositoryLink = { urlRepository ->
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, urlRepository)
+                type = "text/plain"
+            }
+
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
         }
 
-        val shareIntent = Intent.createChooser(sendIntent, null)
-        startActivity(shareIntent)
-    }
-
-    // Metodo responsavel por abrir o browser com o link informado do repositorio
-
-    // @Todo 12 - Colocar esse metodo no click item do adapter
-    fun openBrowser(urlRepository: String) {
-        startActivity(
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(urlRepository)
+        // metodo responsavel por abrir o browser com o link informado do repositorio
+        repoAdapter.openBrowser = { urlRepository ->
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(urlRepository)
+                )
             )
-        )
-
+        }
     }
-
 }
